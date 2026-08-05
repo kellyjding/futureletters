@@ -14,20 +14,27 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  const sheet = getOrCreateSheet_();
-  const params = e.parameter;
+  try {
+    const sheet = getOrCreateSheet_();
+    const params = e.parameter;
 
-  sheet.appendRow([
-    new Date(),
-    params.email || '',
-    params.deliveryDate || '',
-    params.letter || '',
-    'no'  // "Sent?" column — mark "yes" once you've emailed it back
-  ]);
+    sheet.appendRow([
+      new Date(),
+      params.email || '',
+      params.deliveryDate || '',
+      params.letter || '',
+      'no'  // "Sent?" column — mark "yes" once you've emailed it back
+    ]);
 
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok' }))
-    .setMimeType(ContentService.MimeType.JSON);
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'ok' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    logError_(err, e);
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: String(err) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 function getOrCreateSheet_() {
@@ -38,6 +45,23 @@ function getOrCreateSheet_() {
     sheet.appendRow(['Timestamp', 'Email', 'Delivery Date', 'Letter', 'Sent?']);
   }
   return sheet;
+}
+
+// Writes any doPost failure into an "Errors" tab so it's visible without
+// digging through the Apps Script Executions UI.
+function logError_(err, e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName('Errors');
+  if (!sheet) {
+    sheet = ss.insertSheet('Errors');
+    sheet.appendRow(['Timestamp', 'Message', 'Stack', 'Raw params received']);
+  }
+  sheet.appendRow([
+    new Date(),
+    err && err.message ? err.message : String(err),
+    err && err.stack ? err.stack : '',
+    e && e.parameter ? JSON.stringify(e.parameter) : '(no parameters received)'
+  ]);
 }
 
 // Hook this up to a daily time-driven trigger (see README).

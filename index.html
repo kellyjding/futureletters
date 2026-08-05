@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Letter to Your Future Self</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --card-bg: #ffffff;
+    --text: #333333;
+    --muted: #6b6b6b;
+    --border: #3b5bdb;
+    --accent: #d9694f;
+    --accent-hover: #c65a41;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Quicksand', Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 48px;
+    max-width: 1100px;
+    width: 100%;
+  }
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+  .intro {
+    padding-top: 8px;
+    line-height: 1.6;
+    font-size: 17px;
+  }
+  .intro p { margin: 0 0 20px; }
+  .intro ul { margin: 0; padding-left: 20px; }
+  .intro li { margin-bottom: 10px; }
+  .card {
+    background: var(--card-bg);
+    padding: 32px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  textarea {
+    width: 100%;
+    min-height: 420px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'Quicksand', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    color: var(--text);
+    resize: vertical;
+    outline: none;
+  }
+  label.field-label {
+    display: block;
+    font-family: 'Quicksand', Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 20px 0 6px;
+  }
+  .email-wrap {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .email-wrap input {
+    border: none;
+    outline: none;
+    font-family: 'Quicksand', Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    flex: 1;
+  }
+  button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Quicksand', Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #fff;
+    background: var(--accent);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  button:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+  button:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .status {
+    margin-top: 16px;
+    font-family: 'Quicksand', Arial, Helvetica, sans-serif;
+    font-size: 14px;
+  }
+  .status.success { color: #2a7a3b; }
+  .status.error { color: #a12525; }
+  .page-header {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto 40px;
+    text-align: center;
+  }
+  .page-header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>CS50 Letter to Your Future Self</h1>
+</div>
+
+<div class="layout">
+  <div class="intro">
+    <p>
+      Write a letter to your future self at the end of this semester. The beginning of a new school year is 
+      always a great time to pause and reflect on how you're feeling about this new semester!
+    </p>
+    <p>Some questions to get you started:</p>
+    <ul>
+      <li>What are you excited about?</li>
+      <li>What are you nervous or uncertain about?</li>
+      <li>What kind of support do you hope to be for students this semester?</li>
+      <li>How do you want to feel about your teaching come December?</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <form id="letter-form">
+      <textarea id="letter" name="letter" placeholder="Dear ..." required></textarea>
+
+      <label class="field-label" for="email">Your email address</label>
+      <div class="email-wrap">
+        <span>&#9993;</span>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      </div>
+
+      <button type="submit" id="submit-btn">Send to the Future!</button>
+      <div class="status" id="status"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ---- Configuration: edit these two lines ----
+  const DELIVERY_DATE_LABEL = "December 19, 2026";
+  const APPS_SCRIPT_URL = "https://script.google.com/a/macros/cs50.net/s/AKfycbzUQpi-z9KIguQ7HPUmU0wTXVBIAXFRFqYaHL2tKIhQlHaBlSPvLgWJMFS_ugiMoNNB/exec";
+  // ----------------------------------------------
+
+  const form = document.getElementById('letter-form');
+  const statusEl = document.getElementById('status');
+  const submitBtn = document.getElementById('submit-btn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.startsWith('PASTE_')) {
+      statusEl.textContent = 'Setup incomplete: add your Apps Script URL in index.html.';
+      statusEl.className = 'status error';
+      return;
+    }
+
+    const letter = document.getElementById('letter').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    if (!letter || !email) return;
+
+    submitBtn.disabled = true;
+    statusEl.textContent = 'Sending...';
+    statusEl.className = 'status';
+
+    try {
+      const params = new URLSearchParams();
+      params.set('email', email);
+      params.set('letter', letter);
+      params.set('deliveryDate', DELIVERY_DATE_LABEL);
+
+      // Apps Script web apps don't return usable CORS headers for fetch,
+      // so we send no-cors and treat the request as successful once it's sent.
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+      });
+
+      form.style.display = 'none';
+      statusEl.textContent = "Your letter has been saved. See you in " + DELIVERY_DATE_LABEL + "!";
+      statusEl.className = 'status success';
+    } catch (err) {
+      statusEl.textContent = 'Something went wrong. Please try again.';
+      statusEl.className = 'status error';
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
